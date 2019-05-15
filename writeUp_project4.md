@@ -139,9 +139,9 @@ Up to this point, we have been working with a controller that has been relaxed t
 
 3. Run scenario `11_GPSUpdate`. If your controller crashes immediately do not panic. Flying from an estimated state (even with ideal sensors) is very different from flying with ideal pose. You may need to de-tune your controller. Decrease the position and velocity gains (we’ve seen about 30% detuning being effective) to stabilize it.  Your goal is to once again complete the entire simulation cycle with an estimated position error of < 1m.
 
-**Hint: you may find it easiest to do your de-tuning as a 2 step process by reverting to ideal sensors and de-tuning under those conditions first.**
+***Success criteria:*** *The entire simulation cycle is completed with estimated position error of < 1m.*
 
-***Success criteria:*** *Your objective is to complete the entire simulation cycle with estimated position error of < 1m.*
+![Final step good](images/step6_pass.png)
 
 
 
