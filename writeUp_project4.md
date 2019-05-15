@@ -27,35 +27,33 @@ For the controls project, the simulator was working with a perfect set of sensor
 
 3. Process the logged files to figure out the standard deviation of the the GPS X signal and the IMU Accelerometer X signal.
 
-![standardDeviation](images/06_stdDev.png)
+     ![standardDeviation](images/06_stdDev.png)
 
 4. Plug in your result into the top of `config/6_Sensornoise.txt`.  Specially, set the values for `MeasuredStdDev_GPSPosXY` and `MeasuredStdDev_AccelXY` to be the values you have calculated.
 
-5. Run the simulator. If your values are correct, the dashed lines in the simulation will eventually turn green, indicating you’re capturing approx 68% of the respective measurements (which is what we expect within +/- 1 sigma bound for a Gaussian noise model)
+5. Run the simulator.
 
-***Success criteria:*** *Your standard deviations should accurately capture the value of approximately 68% of the respective measurements.*
-
-NOTE: Your answer should match the settings in `SimulatedSensors.txt`, where you can also grab the simulated noise parameters for all the other sensors.
+***Success criteria:*** *The standard deviations accurately capture the value of approximately 68% of the respective measurements.*
 
 
 ### Step 2: Attitude Estimation ###
 
-Now let's look at the first step to our state estimation: including information from our IMU.  In this step, you will be improving the complementary filter-type attitude filter with a better rate gyro attitude integration scheme.
+Now let's look at the first step to our state estimation: including information from our IMU.  In this step, the complementary filter-type attitude filter has to be improved with a better rate gyro attitude integration scheme. The hypothesis that the angular velocity (body frame) can be used directly as angular rotation (global frame) is no longer valid.
 
 1. Run scenario `07_AttitudeEstimation`.  For this simulation, the only sensor used is the IMU and noise levels are set to 0 (see `config/07_AttitudeEstimation.txt` for all the settings for this simulation).  There are two plots visible in this simulation.
    - The top graph is showing errors in each of the estimated Euler angles.
-   - The bottom shows the true Euler angles and the estimates.
-Observe that there’s quite a bit of error in attitude estimation.
+   - The bottom shows the true Euler angles and the estimates. Observe that there’s quite a bit of error in attitude estimation (left graphs).
 
-2. In `QuadEstimatorEKF.cpp`, you will see the function `UpdateFromIMU()` contains a complementary filter-type attitude filter.  To reduce the errors in the estimated attitude (Euler Angles), implement a better rate gyro attitude integration scheme.  You should be able to reduce the attitude errors to get within 0.1 rad for each of the Euler angles, as shown in the screenshot below.
+   ![attitude example](images/attitude-screenshot.png)
 
-![attitude example](images/attitude-screenshot.png)
+2. In `QuadEstimatorEKF.cpp`, the function `UpdateFromIMU()` contains a complementary filter-type attitude filter.  To reduce the errors in the estimated attitude (Euler Angles), a better rate gyro attitude integration scheme has been implemented.  The attitude errors are reduced to get within 0.1 rad for each of the Euler angles, as shown in the screenshot above (right graphs).
+    - Use of the Euler angles
+    - From the gyro the angular velocity in the global frame are known, i.e. (p, q, r)
+    - The Euler angle rates can be computed applying the rotation matrix R (see part 4, lesson 2.10) to the angular velocities, i.e. (phi_dot, theta_dot, psi_dot) = R*(p, q, r)
+    - The Euler angle rates are integrated with the *Euler forward method* to get the new Euler angle estimates (phi, theta, psi)
+    ![attitude example](images/step2_pass.png)
 
-In the screenshot above the attitude estimation using linear scheme (left) and using the improved nonlinear scheme (right). Note that Y axis on error is much greater on left.
-
-***Success criteria:*** *Your attitude estimator needs to get within 0.1 rad for each of the Euler angles for at least 3 seconds.*
-
-**Hint: see section 7.1.2 of [Estimation for Quadrotors](https://www.overleaf.com/read/vymfngphcccj) for a refresher on a good non-linear complimentary filter for attitude using quaternions.**
+***Success criteria:*** *The attitude estimator gets within 0.1 rad for each of the Euler angles for at least 3 seconds. See error plots above.*
 
 
 ### Step 3: Prediction Step ###

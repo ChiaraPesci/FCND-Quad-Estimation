@@ -39,7 +39,8 @@ void OnTimer(int v);
 
 vector<QuadcopterHandle> CreateVehicles();
 //string _scenarioFile="../config/01_Intro.txt";
-string _scenarioFile="../config/06_SensorNoise.txt";
+//string _scenarioFile="../config/06_SensorNoise.txt";
+string _scenarioFile="../config/07_AttitudeEstimation.txt";
 
 #include "MavlinkNode/MavlinkNode.h"
 shared_ptr<MavlinkNode> mlNode;

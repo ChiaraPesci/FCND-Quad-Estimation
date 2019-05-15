@@ -93,9 +93,34 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   // (replace the code below)
   // make sure you comment it out when you add your own code -- otherwise e.g. you might integrate yaw twice
 
-  float predictedPitch = pitchEst + dtIMU * gyro.y;
-  float predictedRoll = rollEst + dtIMU * gyro.x;
-  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+  //float predictedPitch = pitchEst + dtIMU * gyro.y;
+  //float predictedRoll = rollEst + dtIMU * gyro.x;
+  //ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+
+  // Attitude estimation with Euler angles, see part 4 lesson L2.10
+  float phi = rollEst;
+  float theta = pitchEst;
+  Mat3x3F R = Mat3x3F();
+  // column 0
+  R(0,0) = 1.0;
+  R(1,0) = 0.0;
+  R(2,0) = 0.0;
+  // column 1
+  R(0,1) = sin(phi)*tan(theta);
+  R(1,1) = cos(phi);
+  R(2,1) = sin(phi)/cos(theta);
+  // column 2
+  R(0,2) = cos(phi)*tan(theta);
+  R(1,2) = - sin(phi);
+  R(2,2) = cos(phi)/cos(theta);
+  // Get Euler angle rates from the gyro measurements
+  // (phi, theta, psi) = R*(p,q,r)
+  V3F euler_dot = R*gyro;
+
+  // Integration
+  float predictedPitch = pitchEst + dtIMU*euler_dot.y; // roll
+  float predictedRoll = rollEst + dtIMU*euler_dot.x; // pitch
+  ekfState(6) = ekfState(6) + dtIMU*euler_dot.z;	// yaw
 
   // normalize yaw to -pi .. pi
   if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
@@ -108,8 +133,8 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   accelPitch = atan2f(-accel.x, 9.81f);
 
   // FUSE INTEGRATION AND UPDATE
-  rollEst = attitudeTau / (attitudeTau + dtIMU) * (predictedRoll)+dtIMU / (attitudeTau + dtIMU) * accelRoll;
-  pitchEst = attitudeTau / (attitudeTau + dtIMU) * (predictedPitch)+dtIMU / (attitudeTau + dtIMU) * accelPitch;
+  rollEst = attitudeTau/(attitudeTau + dtIMU)*(predictedRoll) + dtIMU/(attitudeTau + dtIMU)*accelRoll;
+  pitchEst = attitudeTau/(attitudeTau + dtIMU)*(predictedPitch) + dtIMU/(attitudeTau + dtIMU)*accelPitch;
 
   lastGyro = gyro;
 }
